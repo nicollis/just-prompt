@@ -46,7 +46,15 @@ def parse_thinking_suffix(model: str) -> Tuple[str, int]:
     thinking_suffix = match.group(2)
     
     # Validate the model - only claude-3-7-sonnet-20250219 supports thinking
-    if base_model != "claude-3-7-sonnet-20250219":
+    # Validate the model - only specific Claude models support thinking
+    supported_thinking_models = [
+        "claude-3-7-sonnet-20250219",
+        "claude-opus-4-20250514", 
+        "claude-sonnet-4-20250514",
+        "claude-opus-4",
+        "claude-sonnet-4"
+    ]
+    if base_model not in supported_thinking_models:
         logger.warning(f"Model {base_model} does not support thinking, ignoring thinking suffix")
         return base_model, 0
     
@@ -174,11 +182,14 @@ def list_models() -> List[str]:
         # Return some known models if API fails
         logger.info("Returning hardcoded list of known Anthropic models")
         return [
-            "claude-3-7-sonnet",
-            "claude-3-5-sonnet",
-            "claude-3-5-sonnet-20240620",
-            "claude-3-opus-20240229",
-            "claude-3-sonnet-20240229",
-            "claude-3-haiku-20240307",
-            "claude-3-5-haiku",
+            "claude-4-opus",              # $15 input / $75 output per 1M tokens
+            "claude-4-sonnet",            # $3 input / $15 output per 1M tokens
+            "claude-3-7-sonnet",          # $3 input / $15 output per 1M tokens
+            "claude-3-7-sonnet-20250219", # $3 input / $15 output per 1M tokens (supports thinking tokens)
+            "claude-3-5-sonnet",          # $3 input / $15 output per 1M tokens
+            "claude-3-5-sonnet-20240620", # $3 input / $15 output per 1M tokens
+            "claude-3-opus-20240229",     # $15 input / $75 output per 1M tokens
+            "claude-3-sonnet-20240229",   # $3 input / $15 output per 1M tokens
+            "claude-3-haiku-20240307",    # $0.25 input / $1.25 output per 1M tokens
+            "claude-3-5-haiku",           # $1 input / $5 output per 1M tokens
         ]

@@ -19,7 +19,13 @@ logger = logging.getLogger(__name__)
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 # Models that support thinking_budget
-THINKING_ENABLED_MODELS = ["gemini-2.5-flash-preview-04-17"]
+THINKING_ENABLED_MODELS = [
+    "gemini-2.0-flash-thinking",    # First thinking model
+    "gemini-2.5-flash",             # Supports thinking with configurable budget (0 to turn off)
+    "gemini-2.5-flash-lite",        # Lowest latency/cost with thinking support
+    "gemini-2.5-pro",               # Advanced reasoning (thinking can't be turned off)
+    "gemini-2.5-flash-preview-04-17"  # Preview version
+]
 
 
 def parse_thinking_suffix(model: str) -> Tuple[str, int]:
@@ -74,6 +80,11 @@ def parse_thinking_suffix(model: str) -> Tuple[str, int]:
             except ValueError:
                 logger.warning(f"Invalid thinking budget format: {suffix}, ignoring")
                 return base_model, 0
+        
+        # Special handling for gemini-2.5-pro - thinking can't be turned off
+        if base_model == "gemini-2.5-pro" and thinking_budget == 0:
+            logger.warning("Thinking cannot be turned off for gemini-2.5-pro, using minimum budget")
+            thinking_budget = 1024  # Set a reasonable minimum
         
         # Adjust values outside the range
         if thinking_budget < 0:
@@ -183,10 +194,22 @@ def list_models() -> List[str]:
         # Return some known models if API fails
         logger.info("Returning hardcoded list of known Gemini models")
         return [
-            "gemini-1.5-pro",
-            "gemini-1.5-flash",
-            "gemini-1.5-flash-latest",
-            "gemini-1.0-pro",
-            "gemini-2.0-flash",
-            "gemini-2.5-flash-preview-04-17"
+            # Gemini 2.5 models (with thinking support)
+            "gemini-2.5-pro",               # Advanced reasoning model (thinking can't be turned off)
+            "gemini-2.5-flash",             # Thinking model with configurable budget
+            "gemini-2.5-flash-lite",        # Lowest latency/cost thinking model
+            "gemini-2.5-flash-preview-04-17", # Preview version with thinking support
+            
+            # Gemini 2.0 models
+            "gemini-2.0-flash",             # Free input/output tokens (experimental)
+            "gemini-2.0-flash-thinking",    # First thinking model (experimental)
+            
+            # Gemini 1.5 models
+            "gemini-1.5-pro",               # $1.25 input / $5 output per 1M tokens (up to 128k)
+            "gemini-1.5-pro-latest",        # Latest version of 1.5 Pro
+            "gemini-1.5-flash",             # Free tier available / Pay-as-you-go pricing varies
+            "gemini-1.5-flash-latest",      # Latest version of 1.5 Flash
+            
+            # Legacy models
+            "gemini-1.0-pro",               # Legacy model
         ]

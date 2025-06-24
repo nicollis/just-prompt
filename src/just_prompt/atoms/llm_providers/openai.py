@@ -14,7 +14,6 @@ basic functionality (and our tests) still work.
 """
 
 import os
-import re
 import logging
 from typing import List, Tuple
 
@@ -172,9 +171,17 @@ def list_models() -> List[str]:
         # Networking errors shouldn't break the caller – return a minimal hard‑coded list.
         logger.warning("Error listing OpenAI models via API (%s). Returning fallback list.", exc)
         return [
-            "gpt-4o-mini",
-            "o4-mini",
-            "o3-mini",
-            "o3",
-            "text-davinci-003",
+            "gpt-4o",           # $2.50 input / $10 output per 1M tokens (cached: $0.50)
+            "gpt-4o-mini",      # $0.15 input / $0.60 output per 1M tokens (cached: $0.0375)
+
+            "gpt-4.1",          # $2 input / $8 output per 1M tokens (cached: $0.50)
+            "gpt-4.1-mini",     # $0.40 input / $1.60 output per 1M tokens (cached: $0.10)
+            "gpt-4.1-nano",     # $0.10 input / $0.40 output per 1M tokens (cached: $0.025)
+            
+            "o3-pro",           # $20 input / $80 output per 1M tokens (reasoning model)
+            "o3",               # $2 input / $8 output per 1M tokens (reasoning model)
+            "o3-mini",          # $1.10 input / $4.40 output per 1M tokens (reasoning model)
+
+            "o4-mini",          # Similar to o3-mini pricing (reasoning model)
+            "o4-mini-high",     # Similar to o3-mini pricing (high reasoning variant)
         ]
