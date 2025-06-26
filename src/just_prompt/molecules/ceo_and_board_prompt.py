@@ -13,7 +13,7 @@ from ..atoms.shared.utils import DEFAULT_MODEL
 logger = logging.getLogger(__name__)
 
 # Default CEO model
-DEFAULT_CEO_MODEL = "anthropic:claude-4-opus"
+DEFAULT_CEO_MODEL = "openai:o3-pro"
 
 # Default CEO decision prompt template
 DEFAULT_CEO_DECISION_PROMPT = """

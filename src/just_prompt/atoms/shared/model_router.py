@@ -34,8 +34,6 @@ class ModelRouter:
             "claude-opus-4-20250514", 
             "claude-sonnet-4-20250514",
             "gemini-2.5-flash-preview-04-17",
-            "claude-opus-4",
-            "claude-sonnet-4"
         ]
         if any(thinking_model in model_name for thinking_model in thinking_models):
             return model_name

@@ -39,8 +39,9 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 # ---------------------------------------------------------------------------
 
 
-_REASONING_ELIGIBLE_MODELS = {"o4-mini", "o3-mini", "o3"}
+_REASONING_ELIGIBLE_MODELS = {"o4-mini", "o3-mini", "o3", "o3-pro"}
 _REASONING_LEVELS = {"low", "medium", "high"}
+_RESPONSES_ONLY_MODELS = {"o3-pro"}  # Models that MUST use responses API
 
 
 # Public so that tests can import.
@@ -135,7 +136,11 @@ def prompt(text: str, model: str) -> str:
 
     base_model, effort = parse_reasoning_suffix(model)
 
-    if effort:
+    # Check if model requires responses API even without effort suffix
+    if effort or base_model in _RESPONSES_ONLY_MODELS:
+        # Use default effort if not specified for models that require responses API
+        if not effort and base_model in _RESPONSES_ONLY_MODELS:
+            effort = "medium"  # Default effort level
         return _prompt_with_reasoning(text, base_model, effort)
 
     # Regular chat completion path
@@ -183,5 +188,4 @@ def list_models() -> List[str]:
             "o3-mini",          # $1.10 input / $4.40 output per 1M tokens (reasoning model)
 
             "o4-mini",          # Similar to o3-mini pricing (reasoning model)
-            "o4-mini-high",     # Similar to o3-mini pricing (high reasoning variant)
         ]

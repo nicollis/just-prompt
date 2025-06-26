@@ -44,23 +44,23 @@ class JustPromptTools:
 # Schema classes for MCP tools
 class PromptSchema(BaseModel):
     text: str = Field(..., description="The prompt text")
-    models_prefixed_by_provider: Optional[List[str]] = Field(
+    models_prefixed_by_provider: Optional[str] = Field(
         None, 
-        description="List of models with provider prefixes (e.g., 'openai:gpt-4o' or 'o:gpt-4o'). If not provided, uses default models."
+        description="Comma-separated list of models with provider prefixes (e.g., 'openai:gpt-4o,anthropic:claude-3-5-sonnet'). If not provided, uses default models."
     )
 
 class PromptFromFileSchema(BaseModel):
     file: str = Field(..., description="Path to the file containing the prompt")
-    models_prefixed_by_provider: Optional[List[str]] = Field(
+    models_prefixed_by_provider: Optional[str] = Field(
         None, 
-        description="List of models with provider prefixes (e.g., 'openai:gpt-4o' or 'o:gpt-4o'). If not provided, uses default models."
+        description="Comma-separated list of models with provider prefixes (e.g., 'openai:gpt-4o,anthropic:claude-3-5-sonnet'). If not provided, uses default models."
     )
 
 class PromptFromFileToFileSchema(BaseModel):
     file: str = Field(..., description="Path to the file containing the prompt")
-    models_prefixed_by_provider: Optional[List[str]] = Field(
+    models_prefixed_by_provider: Optional[str] = Field(
         None, 
-        description="List of models with provider prefixes (e.g., 'openai:gpt-4o' or 'o:gpt-4o'). If not provided, uses default models."
+        description="Comma-separated list of models with provider prefixes (e.g., 'openai:gpt-4o,anthropic:claude-3-5-sonnet'). If not provided, uses default models."
     )
     output_dir: str = Field(
         default=".", 
@@ -75,9 +75,9 @@ class ListModelsSchema(BaseModel):
     
 class CEOAndBoardSchema(BaseModel):
     file: str = Field(..., description="Path to the file containing the prompt")
-    models_prefixed_by_provider: Optional[List[str]] = Field(
+    models_prefixed_by_provider: Optional[str] = Field(
         None, 
-        description="List of models with provider prefixes to act as board members. If not provided, uses default models."
+        description="Comma-separated list of models with provider prefixes to act as board members. If not provided, uses default models."
     )
     output_dir: str = Field(
         default=".", 
@@ -158,7 +158,8 @@ async def serve(default_models: str = DEFAULT_MODEL) -> None:
         
         try:
             if name == JustPromptTools.PROMPT:
-                models_to_use = arguments.get("models_prefixed_by_provider")
+                models_str = arguments.get("models_prefixed_by_provider")
+                models_to_use = [m.strip() for m in models_str.split(",")] if models_str else None
                 responses = prompt(arguments["text"], models_to_use)
                 
                 # Get the model names that were actually used
@@ -171,7 +172,8 @@ async def serve(default_models: str = DEFAULT_MODEL) -> None:
                 )]
                 
             elif name == JustPromptTools.PROMPT_FROM_FILE:
-                models_to_use = arguments.get("models_prefixed_by_provider")
+                models_str = arguments.get("models_prefixed_by_provider")
+                models_to_use = [m.strip() for m in models_str.split(",")] if models_str else None
                 responses = prompt_from_file(arguments["file"], models_to_use)
                 
                 # Get the model names that were actually used
@@ -185,7 +187,8 @@ async def serve(default_models: str = DEFAULT_MODEL) -> None:
                 
             elif name == JustPromptTools.PROMPT_FROM_FILE_TO_FILE:
                 output_dir = arguments.get("output_dir", ".")
-                models_to_use = arguments.get("models_prefixed_by_provider")
+                models_str = arguments.get("models_prefixed_by_provider")
+                models_to_use = [m.strip() for m in models_str.split(",")] if models_str else None
                 file_paths = prompt_from_file_to_file(
                     arguments["file"], 
                     models_to_use,
@@ -217,7 +220,8 @@ async def serve(default_models: str = DEFAULT_MODEL) -> None:
             elif name == JustPromptTools.CEO_AND_BOARD:
                 file_path = arguments["file"]
                 output_dir = arguments.get("output_dir", ".")
-                models_to_use = arguments.get("models_prefixed_by_provider")
+                models_str = arguments.get("models_prefixed_by_provider")
+                models_to_use = [m.strip() for m in models_str.split(",")] if models_str else None
                 ceo_model = arguments.get("ceo_model", DEFAULT_CEO_MODEL)
                 
                 ceo_decision_file = ceo_and_board_prompt(
